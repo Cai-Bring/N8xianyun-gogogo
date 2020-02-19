@@ -96,6 +96,8 @@
             <el-button type="primary" size="mini">评论</el-button>
           </div>
         </el-row>
+
+        <commentList></commentList>
       </div>
     </div>
 
@@ -118,12 +120,16 @@
 </template>
 
 <script>
+import commentList from "@/components/post/commentList.vue";
 
 export default {
   data() {
     return {
       textarea: ""
     };
+  },
+  components: {
+    commentList
   },
   methods: {
     handlePictureCardPreview(file) {},
