@@ -28,9 +28,9 @@ export default {
       url: "/posts/recommend",
       params: this.$route.query
     }).then(res => {
-      console.log(res);
+    //   console.log(res);
       this.recommendData = res.data.data;
-      console.log(this.recommendData);
+    //   console.log(this.recommendData);
     });
   },
   filters: {

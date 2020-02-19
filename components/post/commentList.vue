@@ -1,20 +1,19 @@
 <template>
   <div>
     <div class="cmt-list">
-      <div class="cmt-item">
+      <div class="cmt-item" v-for="(item,index) in commentsList" :key="index">
         <div class="cmt-info">
-          <img src="http://157.122.54.189:9095/assets/images/avatar.jpg" />
-          flash
-          <i>2020-02-16 9:26</i>
+          <img :src="`http://127.0.0.1:1337${item.account.defaultAvatar}`" />
+          {{item.account.nickname}}
+          <i>{{item.created_at | dateFormat}}</i>
           <span>1</span>
         </div>
         <div class="cmt-content">
-          <!---->
           <div class="cmt-new">
-            <p class="cmt-message"></p>
+            <p class="cmt-message" v-html="item.content"></p>
             <el-row type="flex">
-              <div class="cmt-pic">
-                <img src="http://157.122.54.189:9095/uploads/fa42da6ffc5345229ac4f3c4b841af0b.jpg" />
+              <div class="cmt-pic" v-for="(pic,index) in item.pics" :key="index">
+                <img :src="`http://127.0.0.1:1337${pic.url}`" />
               </div>
             </el-row>
             <div class="cmt-ctrl">
@@ -30,27 +29,56 @@
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
         :current-page="currentPage"
-        :page-sizes="[100, 200, 300, 400]"
-        :page-size="100"
+        :page-sizes="[3, 4, 5, 6]"
+        :page-size="pageSize"
         layout="total, sizes, prev, pager, next, jumper"
-        :total="1000"
+        :total="commentsTotal"
       ></el-pagination>
     </el-row>
   </div>
 </template>
 
 <script>
+import { dateFormat } from "@/assets/filters.js";
+
 export default {
   data() {
     return {
-      currentPage: 1
+      currentPage: 1,
+      pageSize: 5,
+      commentsTotal: 0,
+      commentsList: []
     };
   },
-  methods: {
-    handleSizeChange() {},
-    handleCurrentChange() {}
+  filters: {
+    dateFormat
   },
-  mounted() {}
+  methods: {
+    // 显示条数改变时触发
+    handleSizeChange(val) {
+      // console.log(val);
+      this.pageSize = val;
+    },
+    // 页码改变时触发
+    handleCurrentChange(val) {
+      // console.log(val);
+      this.currentPage = val;
+    }
+  },
+  mounted() {
+    this.$axios({
+      url: "/posts/comments",
+      params: {
+        post: this.$route.query.id,
+        _start: this.currentPage - 1,
+        _limit: this.pageSize
+      }
+    }).then(res => {
+      console.log(res);
+      this.commentsTotal = res.data.total;
+      this.commentsList = res.data.data;
+    });
+  }
 };
 </script>
 
@@ -116,10 +144,6 @@ export default {
       font-size: 12px;
       color: #1e50a2;
       text-align: right;
-
-      a {
-        display: none;
-      }
     }
   }
 }
