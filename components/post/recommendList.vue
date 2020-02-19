@@ -1,13 +1,12 @@
 <template>
   <div>
     <h4 class="aside-title">相关攻略</h4>
-    <div class="recommend-list">
-      <a href="/post/detail?id=4" class="recommend-item">
+    <div class="recommend-list" v-for="(item,index) in recommendData" :key="index">
+      <a :href="`/post/detail?id=${item.id}`" class="recommend-item">
         <el-row class="post-imgText" type="flex">
-          <!---->
           <div class="post-text">
-            <div>123</div>
-            <p>2020-02-19 10:49 阅读</p>
+            <div v-html="item.content"></div>
+            <p>{{item.created_at | dateFormat}} 阅读{{item.watch}}</p>
           </div>
         </el-row>
       </a>
@@ -18,7 +17,30 @@
 <script>
 export default {
   data() {
-    return {};
+    return {
+      recommendData: []
+    };
+  },
+  mounted() {
+    this.$axios({
+      url: "/posts/recommend",
+      params: this.$route.query
+    }).then(res => {
+      console.log(res);
+      this.recommendData = res.data.data;
+      console.log(this.recommendData);
+    });
+  },
+  filters: {
+    dateFormat(date) {
+      let year = new Date(date).getFullYear();
+      let mouth = new Date(date).getMonth() + 1;
+      let day = new Date(date).getDate();
+      let hours = new Date(date).getHours();
+      let minutes = new Date(date).getMinutes();
+
+      return `${year}年${mouth}月${day}日 ${hours}:${minutes}`;
+    }
   }
 };
 </script>
