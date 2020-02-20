@@ -3,10 +3,14 @@
     <el-row type="flex" class="row-bg travel-strategy">
       <!-- 左边 -->
       <div class="left">
+        <!-- 推荐城市组件 -->
         <RecommendCity />
       </div>
       <!-- 右边  -->
-      <div class="strategy-list"><!--嘎嘎嘎嘎嘎过过过过过过过过过过过过过过过过过过过过过过过过过过过过过过过过--></div>
+      <div class="strategy-list">
+        <!-- 输入框组件 -->
+        <StrategyInput/>
+      </div>
     </el-row>
   </div>
 </template>
@@ -14,9 +18,12 @@
 <script>
 //推荐城市
 import RecommendCity from "@/components/post/RecommendCity.vue";
+//输入框
+import StrategyInput from '@/components/post/StrategyInput'
 export default {
   components: {
-    RecommendCity //推荐城市
+    RecommendCity, //推荐城市
+    StrategyInput,//输入框
   }
 };
 </script>
