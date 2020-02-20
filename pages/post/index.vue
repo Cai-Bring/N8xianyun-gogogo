@@ -15,7 +15,7 @@
           <el-button type="primary" icon="el-icon-edit">写游记</el-button>
         </div>
         <!-- 循环文章列表 -->
-        <ArticleList />
+        <ArticleList  v-for="(value,index) in wenzhangList" :data="value" :key="index"/>
       </div>
     </el-row>
   </div>
@@ -29,17 +29,25 @@ import StrategyInput from "@/components/post/StrategyInput";
 //文章列表组件
 import ArticleList from "@/components/post/ArticleList";
 export default {
+  data(){
+    return{
+    wenzhangList:[]
+    }
+  },
   components: {
     RecommendCity, //推荐城市
     StrategyInput, //输入框
     ArticleList //文章列表
   },
   mounted() {
+    //判断当前路由是否有参数
     //获取文章列表
     this.$axios({
       url: "/posts"
     }).then(res => {
       console.log(res);
+      //赋值
+      this.wenzhangList = res.data.data
     });
   }
 };
