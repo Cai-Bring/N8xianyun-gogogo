@@ -6,9 +6,13 @@
           <img :src="`http://127.0.0.1:1337${item.account.defaultAvatar}`" />
           {{item.account.nickname}}
           <i>{{item.created_at | dateFormat}}</i>
-          <span>1</span>
+          <span>{{item.level}}</span>
         </div>
         <div class="cmt-content">
+          <!-- 回复内容parent -->
+          <commentParent :parent="item.parent" v-if="item.parent"></commentParent>
+
+          <!-- 回复内容 -->
           <div class="cmt-new">
             <p class="cmt-message" v-html="item.content"></p>
             <el-row type="flex">
@@ -24,7 +28,7 @@
       </div>
     </div>
 
-    <el-row type="flex" justify="center" style="margin-top:10px">
+    <el-row type="flex" justify="center" style="margin-top:10px" v-if="commentsTotal!=0">
       <el-pagination
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
@@ -40,6 +44,7 @@
 
 <script>
 import { dateFormat } from "@/assets/filters.js";
+import commentParent from "@/components/post/commentParent.vue";
 
 export default {
   data() {
@@ -49,6 +54,9 @@ export default {
       commentsTotal: 0,
       commentsList: []
     };
+  },
+  components: {
+    commentParent
   },
   filters: {
     dateFormat
@@ -89,16 +97,16 @@ export default {
 
 .cmt-item {
   border-bottom: 1px dashed #ddd;
-  padding: 20px 20px 5px;
+  padding: 10px 10px 5px 5px;
 
   .cmt-info {
-    margin-bottom: 10px;
+    margin-bottom: 5px;
     font-size: 12px;
     color: #666;
 
     img {
-      width: 16px;
-      height: 16px;
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
     }
 
@@ -144,6 +152,10 @@ export default {
       font-size: 12px;
       color: #1e50a2;
       text-align: right;
+
+      & * {
+        display: none;
+      }
     }
   }
 }
