@@ -53,6 +53,9 @@ export default {
       &::before {
         line-height: 34px;
       }
+      &:hover{
+          cursor: pointer;
+      }
     }
   }
   .tuijian{

@@ -14,6 +14,8 @@
           <h4>推荐攻略</h4>
           <el-button type="primary" icon="el-icon-edit">写游记</el-button>
         </div>
+        <!-- 循环文章列表 -->
+        <ArticleList />
       </div>
     </el-row>
   </div>
@@ -24,10 +26,21 @@
 import RecommendCity from "@/components/post/RecommendCity.vue";
 //输入框
 import StrategyInput from "@/components/post/StrategyInput";
+//文章列表组件
+import ArticleList from "@/components/post/ArticleList";
 export default {
   components: {
     RecommendCity, //推荐城市
-    StrategyInput //输入框
+    StrategyInput, //输入框
+    ArticleList //文章列表
+  },
+  mounted() {
+    //获取文章列表
+    this.$axios({
+      url: "/posts"
+    }).then(res => {
+      console.log(res);
+    });
   }
 };
 </script>
@@ -49,7 +62,7 @@ export default {
     .h4 {
       height: 40px;
       align-items: center;
-        position: relative;
+      position: relative;
       padding-bottom: 10px;
       border-bottom: 1px solid #eee;
       display: flex;

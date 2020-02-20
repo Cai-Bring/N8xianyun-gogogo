@@ -30,7 +30,7 @@
                     </el-row>
                     <el-dropdown-menu slot="dropdown">
                         <el-dropdown-item>
-                           <nuxt-link to="#">个人中心</nuxt-link>
+                           <nuxt-link to="/user/personal">个人中心</nuxt-link>
                         </el-dropdown-item>
                         <el-dropdown-item>
                             <div @click="handleLogout">退出</div> 
