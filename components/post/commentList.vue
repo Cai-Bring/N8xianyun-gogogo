@@ -13,7 +13,7 @@
           <commentParent :parent="item.parent" v-if="item.parent"></commentParent>
 
           <!-- 回复内容 -->
-          <div class="cmt-new">
+          <div class="cmt-new" @mouseover="showReply(index)" @mouseout="notShowReply(index)">
             <p class="cmt-message" v-html="item.content"></p>
             <el-row type="flex">
               <div class="cmt-pic" v-for="(pic,index) in item.pics" :key="index">
@@ -21,7 +21,7 @@
               </div>
             </el-row>
             <div class="cmt-ctrl">
-              <a href="javascript:;">回复</a>
+              <a href="javascript:;" v-show="index == showIndex">回复</a>
             </div>
           </div>
         </div>
@@ -52,7 +52,8 @@ export default {
       currentPage: 1,
       pageSize: 5,
       commentsTotal: 0,
-      commentsList: []
+      commentsList: [],
+      showIndex: null
     };
   },
   components: {
@@ -88,6 +89,15 @@ export default {
       // console.log(val);
       this.currentPage = val;
       this.getCommentsData();
+    },
+    // 显示回复按钮
+    showReply(index) {
+      // console.log(index);
+      this.showIndex = index;
+    },
+    notShowReply(index) {
+      // console.log(index);
+      this.showIndex = null;
     }
   },
   mounted() {
@@ -158,10 +168,6 @@ export default {
       font-size: 12px;
       color: #1e50a2;
       text-align: right;
-
-      & * {
-        display: none;
-      }
     }
   }
 }

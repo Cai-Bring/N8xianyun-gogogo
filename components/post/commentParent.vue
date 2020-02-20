@@ -15,7 +15,9 @@
           <img :src="`http://127.0.0.1:1337${pic.url}`" />
         </div>
       </el-row>
-      <div class="cmt-ctrl"></div>
+      <div class="cmt-ctrl">
+        <a href="javascript:;">回复</a>
+      </div>
     </div>
   </div>
 </template>

@@ -84,13 +84,18 @@
         </div>
         <el-row type="flex" class="cmt-input-ctrls" justify="space-between">
           <el-upload
-            action="suibian"
+            action="http://127.0.0.1:1337/upload"
+            name="files"
             list-type="picture-card"
             :on-preview="handlePictureCardPreview"
             :on-remove="handleRemove"
+            :on-success="handleUpload"
           >
             <i class="el-icon-plus"></i>
           </el-upload>
+          <el-dialog :visible.sync="dialogVisible">
+            <img width="100%" :src="dialogImageUrl" alt />
+          </el-dialog>
 
           <div>
             <el-button type="primary" size="mini">评论</el-button>
@@ -115,7 +120,9 @@ export default {
   data() {
     return {
       textarea: "",
-      detailData: {}
+      detailData: {},
+      dialogImageUrl: "",
+      dialogVisible: false
     };
   },
   components: {
@@ -123,8 +130,17 @@ export default {
     recommendList
   },
   methods: {
-    handlePictureCardPreview(file) {},
-    handleRemove(file, fileList) {}
+    handleUpload(response, file, fileList) {
+      console.log(response, file, fileList);
+    },
+    handlePictureCardPreview(file) {
+      console.log(file);
+      this.dialogImageUrl = file.url;
+      this.dialogVisible = true;
+    },
+    handleRemove(file, fileList) {
+      console.log(file, fileList);
+    }
   },
   mounted() {
     this.$axios({
