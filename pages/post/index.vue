@@ -9,7 +9,11 @@
       <!-- 右边  -->
       <div class="strategy-list">
         <!-- 输入框组件 -->
-        <StrategyInput/>
+        <StrategyInput />
+        <div class="h4">
+          <h4>推荐攻略</h4>
+          <el-button type="primary" icon="el-icon-edit">写游记</el-button>
+        </div>
       </div>
     </el-row>
   </div>
@@ -19,18 +23,18 @@
 //推荐城市
 import RecommendCity from "@/components/post/RecommendCity.vue";
 //输入框
-import StrategyInput from '@/components/post/StrategyInput'
+import StrategyInput from "@/components/post/StrategyInput";
 export default {
   components: {
     RecommendCity, //推荐城市
-    StrategyInput,//输入框
+    StrategyInput //输入框
   }
 };
 </script>
 
 <style lang="less" scoped>
-.post{
-  padding:20px 0; 
+.post {
+  padding: 20px 0;
 }
 .travel-strategy {
   margin: 0 auto;
@@ -42,6 +46,31 @@ export default {
   }
   .strategy-list {
     width: 700px;
+    .h4 {
+      height: 40px;
+      align-items: center;
+        position: relative;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      h4 {
+        display: inline-block;
+        font-weight: 400;
+        font-size: 18px;
+        color: orange;
+        &::after {
+          display: block;
+          content: "";
+          width: 72px;
+          height: 2px;
+          background: orange;
+          position: absolute;
+          bottom: 0;
+          left: 0;
+        }
+      }
+    }
   }
 }
 </style>

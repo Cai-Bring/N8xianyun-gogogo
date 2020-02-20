@@ -94,6 +94,7 @@ export default {
   }
   .exhibition {
     // display: none;
+    z-index: 4;
     position: absolute;
     border: 1px solid #ddd;
     width: 340px;
@@ -135,7 +136,7 @@ export default {
   border-top: 1px solid #ddd;
   border-left: 1px solid #ddd;
   /deep/.wodiu {
-    z-index: 3;
+    z-index: 5;
     box-sizing: border-box;
     padding: 0 20px;
     // height: 40px;
