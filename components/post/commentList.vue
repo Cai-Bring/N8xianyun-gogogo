@@ -62,30 +62,36 @@ export default {
     dateFormat
   },
   methods: {
+    // 调用接口获取数据
+    getCommentsData() {
+      this.$axios({
+        url: "/posts/comments",
+        params: {
+          post: this.$route.query.id,
+          _start: this.currentPage - 1,
+          _limit: this.pageSize
+        }
+      }).then(res => {
+        console.log(res);
+        this.commentsTotal = res.data.total;
+        this.commentsList = res.data.data;
+      });
+    },
     // 显示条数改变时触发
     handleSizeChange(val) {
       // console.log(val);
       this.pageSize = val;
+      this.getCommentsData();
     },
     // 页码改变时触发
     handleCurrentChange(val) {
       // console.log(val);
       this.currentPage = val;
+      this.getCommentsData();
     }
   },
   mounted() {
-    this.$axios({
-      url: "/posts/comments",
-      params: {
-        post: this.$route.query.id,
-        _start: this.currentPage - 1,
-        _limit: this.pageSize
-      }
-    }).then(res => {
-      console.log(res);
-      this.commentsTotal = res.data.total;
-      this.commentsList = res.data.data;
-    });
+    this.getCommentsData();
   }
 };
 </script>
