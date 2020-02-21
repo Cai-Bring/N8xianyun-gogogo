@@ -31,7 +31,7 @@
       </div>
     </el-row>
 
-    <commentList></commentList>
+    <commentList :emitNum="emitNum"></commentList>
   </div>
 </template>
 
@@ -44,7 +44,8 @@ export default {
       textarea: "",
       pictureList: [],
       dialogImageUrl: "",
-      dialogVisible: false
+      dialogVisible: false,
+      emitNum: 0
     };
   },
   components: {
@@ -89,6 +90,7 @@ export default {
           message: "恭喜你，口吐芬芳成功",
           type: "success"
         });
+        this.emitNum++;
       });
     }
   }
