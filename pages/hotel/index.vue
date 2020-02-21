@@ -47,7 +47,7 @@
             </div>
           </div>
         </div>
-        <el-button type="primary">查看价格</el-button>
+        <el-button type="primary" @click="hotelPrice">查看价格</el-button>
     </div>
   </div>
 </template>
@@ -58,6 +58,7 @@ export default {
     return {
       usermaplocation: {},
       city: '',
+      cityID: '',
       searchCity: '',
       time: '',
       pickerOptions: {
@@ -73,13 +74,21 @@ export default {
   },
   mounted() {
     // IP定位代码
+    if (this.$route.query.city) {
+      this.getCity(`/cities?name=${this.$route.query.city}`,(res) => {
+        this.cityID = res.data.data[0].id
+        this.getHotel({city: this.cityID}, ()=>{
+          // 城市的数据
+          console.log(res.data.data)
+        })
+      })
+    }
     let nuxt = document.querySelector('#__nuxt')
     nuxt.onclick = (e) => {
       let numberOfPeopleChange = document.querySelector('.numberOfPeopleChange')
       if (e.target === numberOfPeopleChange || e.target.offsetParent === numberOfPeopleChange) return
       this.numberOfPeopleChange = false
     }
-    console.log(nuxt)
     this.city = this.$route.query.city
     window.onLoad = () => {
       var map = new AMap.Map("container");
@@ -96,6 +105,10 @@ export default {
           if (status === "complete" && result.info === "OK") {
             // 查询成功，result即为当前所在城市信息
             this.$router.push({name:'hotel', query:{city: result.city}})
+            this.$alert(`定位当前城市: ${result.city}`, '提示', {
+              confirmButtonText: '确定',
+              type: 'success'
+            });
           }
         });
       });
@@ -110,24 +123,75 @@ export default {
       document.head.appendChild(jsapi);
     },
     querySearchAsync(queryString, cb) {
-      console.log(123)
+      if (queryString.trim()) {
+        this.getCity(`/cities?name=${queryString}`,(res)=>{
+          // 城市的数据
+          console.log(res.data.data)
+          if(res.data.data.length !== 0) {
+            let city = res.data.data.map(v=>{
+              return {
+                value:v.name.slice(0,v.name.length-1),
+                allName: v.name
+              }
+            })
+            cb(city)
+          } else {
+            cb([])
+          }
+        })
+        return
+      }
       cb([])
     },
     handleSelect(item) {
-      console.log(item);
+      this.$router.push({name:'hotel', query:{city: item.allName}})
+      this.searchCity = ''
     },
-    numberOfPeopleFocus () {
-      console.log(123);
-      
+    hotelPrice () {
+      let params= {}
+      if (this.time) {
+        params= {
+          enterTime: `${this.time[0].getFullYear()}-${this.time[0].getMonth()+1}-${this.time[0].getDate()}`,
+          leftTime: `${this.time[1].getFullYear()}-${this.time[1].getMonth()+1}-${this.time[1].getDate()}`,
+          city: this.cityID
+        } 
+      }
+      this.getHotel(params, (res)=>{
+        // 城市的数据
+        console.log(res.data.data)
+      })
     },
     numberOfPeopleChangeOkFun () {
       this.numberOfPeopleChange = false
       this.numberOfPeopleChangeOk=this.numberOfPeople+this.numberOfPeople2
+    },
+    getCity (url,callback){
+      // 获取城市的详细数据
+      this.$axios({
+          url
+        }).then(res => {
+          callback(res)
+        })
+    },
+    getHotel (params,callback) {
+      this.$axios({
+          url: `/hotels`,
+          params
+        }).then(res => {
+          callback(res)
+        })
     }
   },
   watch: {
     '$route.query' () {
       this.city = this.$route.query.city
+      this.getCity(`/cities?name=${this.$route.query.city}`,(res) => {
+        this.cityID = res.data.data[0].id
+        this.getHotel({city: this.cityID}, ()=>{
+          // 城市的数据
+          console.log(res)
+        })
+      })
     }
   }
 };
@@ -143,10 +207,10 @@ export default {
       display: inline-flex;
       position: relative;
       width: 200px;
-      height: 40px;
+      height: 39.5px;
       border: 1px solid #DCDFE6;
       border-radius: 4px;
-      line-height: 37px;
+      line-height: 39.5px;
       padding-left: 10px;
       box-sizing: border-box;
       color: #DCDFE6;
