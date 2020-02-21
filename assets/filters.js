@@ -7,5 +7,8 @@ export const dateFormat = Vue.filter('dateFormat', (date) => {
   let day = new Date(date).getDate()
   let hours = new Date(date).getHours()
   let minutes = new Date(date).getMinutes()
+  if (minutes < 10) {
+    minutes = '0' + minutes
+  }
   return `${year}年${mouth}月${day}日 ${hours}:${minutes}`
 })
