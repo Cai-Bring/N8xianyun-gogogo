@@ -70,40 +70,7 @@
       </div>
 
       <!-- 评论 -->
-      <div class="cmt-wrapper">
-        <h4 class="cmt-title">评论</h4>
-        <div class="cmt-input">
-          <el-input
-            autocomplete="off"
-            type="textarea"
-            :rows="2"
-            placeholder="说点什么吧..."
-            v-model="textarea"
-            resize="none"
-          ></el-input>
-        </div>
-        <el-row type="flex" class="cmt-input-ctrls" justify="space-between">
-          <el-upload
-            action="http://127.0.0.1:1337/upload"
-            name="files"
-            list-type="picture-card"
-            :on-preview="handlePictureCardPreview"
-            :on-remove="handleRemove"
-            :on-success="handleUpload"
-          >
-            <i class="el-icon-plus"></i>
-          </el-upload>
-          <el-dialog :visible.sync="dialogVisible">
-            <img width="100%" :src="dialogImageUrl" alt />
-          </el-dialog>
-
-          <div>
-            <el-button type="primary" size="mini">评论</el-button>
-          </div>
-        </el-row>
-
-        <commentList></commentList>
-      </div>
+      <comments class="cmt-wrapper"></comments>
     </div>
 
     <!-- 相关攻略 -->
@@ -113,34 +80,18 @@
 
 <script>
 import { dateFormat } from "@/assets/filters.js";
-import commentList from "@/components/post/commentList.vue";
+import comments from "@/components/post/comments.vue";
 import recommendList from "@/components/post/recommendList.vue";
 
 export default {
   data() {
     return {
-      textarea: "",
-      detailData: {},
-      dialogImageUrl: "",
-      dialogVisible: false
+      detailData: {}
     };
   },
   components: {
-    commentList,
+    comments,
     recommendList
-  },
-  methods: {
-    handleUpload(response, file, fileList) {
-      // console.log(response, file, fileList);
-    },
-    handlePictureCardPreview(file) {
-      // console.log(file);
-      this.dialogImageUrl = file.url;
-      this.dialogVisible = true;
-    },
-    handleRemove(file, fileList) {
-      // console.log(file, fileList);
-    }
   },
   mounted() {
     this.$axios({
@@ -219,26 +170,6 @@ export default {
 
     .cmt-wrapper {
       margin-bottom: 20px;
-
-      .cmt-title {
-        font-weight: 400;
-        font-size: 18px;
-        margin-bottom: 20px;
-      }
-
-      .cmt-input {
-        margin-bottom: 10px;
-      }
-
-      .cmt-input-ctrls {
-        margin-bottom: 30px;
-
-        /deep/.el-upload--picture-card {
-          width: 100px;
-          height: 100px;
-          line-height: 100px;
-        }
-      }
     }
   }
 
