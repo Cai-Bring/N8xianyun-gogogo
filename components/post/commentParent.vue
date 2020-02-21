@@ -87,10 +87,6 @@ export default {
       font-size: 12px;
       color: #1e50a2;
       text-align: right;
-
-      & * {
-        display: none;
-      }
     }
   }
 }
