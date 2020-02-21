@@ -52,8 +52,8 @@ export default {
       currentPage: 1,
       pageSize: 5,
       commentsTotal: 0,
-      commentsList: [],
-      showIndex: null
+      commentsList: []
+      // showIndex: null
     };
   },
   components: {
@@ -69,11 +69,11 @@ export default {
         url: "/posts/comments",
         params: {
           post: this.$route.query.id,
-          _start: this.currentPage - 1,
+          _start: (this.currentPage - 1) * this.pageSize,
           _limit: this.pageSize
         }
       }).then(res => {
-        console.log(res);
+        // console.log(res);
         this.commentsTotal = res.data.total;
         this.commentsList = res.data.data;
       });
@@ -89,7 +89,7 @@ export default {
       // console.log(val);
       this.currentPage = val;
       this.getCommentsData();
-    },
+    }
     // 显示回复按钮
     // showReply(index) {
     //   // console.log(index);

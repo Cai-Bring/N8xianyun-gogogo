@@ -131,15 +131,15 @@ export default {
   },
   methods: {
     handleUpload(response, file, fileList) {
-      console.log(response, file, fileList);
+      // console.log(response, file, fileList);
     },
     handlePictureCardPreview(file) {
-      console.log(file);
+      // console.log(file);
       this.dialogImageUrl = file.url;
       this.dialogVisible = true;
     },
     handleRemove(file, fileList) {
-      console.log(file, fileList);
+      // console.log(file, fileList);
     }
   },
   mounted() {
@@ -147,9 +147,9 @@ export default {
       url: "/posts",
       params: this.$route.query
     }).then(res => {
-      console.log(res);
+      // console.log(res);
       this.detailData = { ...res.data.data[0] };
-      console.log(this.detailData);
+      // console.log(this.detailData);
     });
   },
   filters: {
