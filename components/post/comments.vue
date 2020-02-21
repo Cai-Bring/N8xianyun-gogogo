@@ -85,6 +85,10 @@ export default {
         }
       }).then(res => {
         // console.log(res);
+        this.$message({
+          message: "恭喜你，口吐芬芳成功",
+          type: "success"
+        });
       });
     }
   }
