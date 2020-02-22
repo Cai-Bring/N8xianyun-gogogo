@@ -7,6 +7,7 @@
       <el-breadcrumb-item :to="{ path: '/hotel' }">{{myhotel.real_city}}{{myhotel.big_cate}}</el-breadcrumb-item>
       <el-breadcrumb-item>{{myhotel.name}}</el-breadcrumb-item>
     </el-breadcrumb>
+
     <!-- 酒店介绍部分 -->
     <div class="thishotel">
       <el-row class="hotelname" type="flex" align="middle">
@@ -23,10 +24,12 @@
       <i class="el-icon-location"></i>
       <span>{{myhotel.address}}</span>
     </div>
+
     <!-- 酒店详情部分 -->
     <div class="abouthotel">
       <img :src="myhotel.photos" alt />
     </div>
+
     <!-- 酒店价格部分 -->
     <div class="hotelprice">
       <el-table :data="myhotel.products" style="width: 100%">
@@ -44,20 +47,139 @@
 
     <!-- 地图部分 -->
     <el-row class="map" type="flex">
+      <!-- 地图 -->
       <el-col>
         <div id="container"></div>
       </el-col>
+      <!-- 地图侧边栏 -->
       <el-col style="margin-left:20px">
+        <!-- 地图TAB栏 -->
         <el-tabs v-model="activeName" @tab-click="handleClick" :stretch="true">
           <el-tab-pane label="风景" name="first"></el-tab-pane>
           <el-tab-pane label="交通" name="second"></el-tab-pane>
         </el-tabs>
+        <!-- 地图搜索栏 -->
         <div id="panel"></div>
       </el-col>
     </el-row>
+
+    <!-- 酒店相信服务部分 -->
+    <div class="hotelmsg">
+      <!-- 基本信息 -->
+      <el-row class="haveborder">
+        <el-col :span="4" class="haveborderson">基本信息</el-col>
+        <el-col :span="20" class="haveborderson">
+          <el-row type="flex" class="sons">
+            <el-col :span="24">入住时间: 14:00之后</el-col>
+            <el-col :span="24">离店时间: 12:00之前</el-col>
+            <el-col :span="24">{{myhotel.creation_time}}/{{myhotel.renovat_time}}</el-col>
+            <el-col :span="24">酒店规模:{{myhotel.roomCount}}间客房</el-col>
+          </el-row>
+        </el-col>
+      </el-row>
+      <!-- 主要设施 -->
+      <el-row class="haveborder">
+        <el-col :span="4" class="haveborderson">主要设施</el-col>
+        <el-col :span="20" class="haveborderson">
+          <el-row type="flex" class="sons">
+            <span
+              v-for="(item,index) in myhotel.hotelassets"
+              :key="index"
+              class="assitem"
+            >{{item.name}}</span>
+          </el-row>
+        </el-col>
+      </el-row>
+      <!-- 停车服务 -->
+      <el-row class="haveborder">
+        <el-col :span="4" class="haveborderson">停车服务</el-col>
+        <el-col :span="20" class="haveborderson">
+          <el-row type="flex" class="sons">
+            <span v-if="myhotel.parking===null">-</span>
+            <span v-if="myhotel.parking!==null">{{myhotel.parking}}</span>
+          </el-row>
+        </el-col>
+      </el-row>
+      <!-- 品牌信息 -->
+      <el-row class="haveborder">
+        <el-col :span="4" class="haveborderson">品牌信息</el-col>
+        <el-col :span="20" class="haveborderson">
+          <el-row type="flex" class="sons">
+            <span v-if="hotelbrand===null">-</span>
+            <span v-if="hotelbrand!==null">{{hotelbrand.name}}</span>
+          </el-row>
+        </el-col>
+      </el-row>
+    </div>
+
     <!-- 底部评论部分 -->
     <div class="remarks">
-      <!-- <el-rate v-model="value" disabled text-color="#ff9900" score-template="{value}"></el-rate> -->
+      <h2>{{myhotel.all_remarks}}条真实用户评论</h2>
+      <el-row type="flex" align="middle">
+        <el-col :span="4" class="allremarks">
+          <el-row>总评数：{{myhotel.all_remarks}}</el-row>
+          <el-row>好评数：{{myhotel.good_remarks}}</el-row>
+          <el-row>差评数：{{myhotel.bad_remarks}}</el-row>
+        </el-col>
+        <el-col :span="5" class="mystars">
+          <el-rate
+            v-model="value"
+            disabled
+            text-color="#ff9900"
+            show-score
+            score-template="{value}"
+          ></el-rate>
+          <div class="stamp" v-if="value>=4">推荐</div>
+        </el-col>
+        <el-col :span="3">
+          <div class="ratebox">
+            <el-progress
+              :width="70"
+              color="#f90"
+              type="circle"
+              :show-text="false"
+              v-if="environment"
+              :percentage="environment"
+            ></el-progress>
+            <div class="ratetext">
+              <p>环境</p>
+              {{environment/10}}
+            </div>
+          </div>
+        </el-col>
+        <el-col :span="3">
+          <div class="ratebox">
+            <el-progress
+              :width="70"
+              color="#f90"
+              type="circle"
+              :show-text="false"
+              v-if="product"
+              :percentage="product"
+            ></el-progress>
+            <div class="ratetext">
+              <p>产品</p>
+              {{product/10}}
+            </div>
+          </div>
+        </el-col>
+        <el-col :span="3">
+          <div class="ratebox">
+            <el-progress
+              :width="70"
+              color="#f90"
+              type="circle"
+              :show-text="false"
+              v-if="service"
+              :percentage="service"
+            ></el-progress>
+            <div class="ratetext">
+              <p>服务</p>
+              {{service/10}}
+            </div>
+          </div>
+        </el-col>
+      </el-row>
     </div>
   </div>
 </template>
@@ -65,10 +187,14 @@
 export default {
   data() {
     return {
-      myhotel: {},
-      value: 0,
-      map: "",
-      activeName: "first"
+      myhotel: {}, // 酒店数据
+      value: 0, // 酒店评分星星
+      map: "", // 地图
+      activeName: "first", // 地图侧边栏的TAB切换,默认为first,第一个
+      hotelbrand: null, // 酒店品牌信息
+      environment: "", //环境评分
+      product: "", // 产品评分
+      service: "" //服务评分
     };
   },
   mounted() {
@@ -79,6 +205,10 @@ export default {
     }).then(res => {
       this.myhotel = res.data.data[0];
       this.value = res.data.data[0].stars;
+      this.hotelbrand = this.myhotel.hotelbrand;
+      this.environment = this.myhotel.scores.environment * 10;
+      this.product = this.myhotel.scores.product * 10;
+      this.service = this.myhotel.scores.service * 10;
       console.log(this.myhotel);
       // 异步导入地图js （来自于官网）
       var url =
@@ -97,14 +227,17 @@ export default {
             this.myhotel.location.latitude
           ]
         });
+        // 调用地图搜索方法
         this.searchmap("风景");
       };
     });
   },
   methods: {
+    // 点击地图TAB栏切换触发的事件
     handleClick(tab, event) {
       // console.log(tab);
       // console.log(event);
+      // 初始化地图
       this.map = new AMap.Map("container", {
         resizeEnable: true, //是否监控地图容器尺寸变化
         zoom: 11, //初始化地图层级
@@ -113,8 +246,10 @@ export default {
           this.myhotel.location.latitude
         ]
       });
+      // 调用地图搜索方法
       this.searchmap(tab.label);
     },
+    // 封装一个地图搜索的方法
     searchmap(whereplace) {
       AMap.service(["AMap.PlaceSearch"], () => {
         //构造地点查询类
@@ -135,6 +270,7 @@ export default {
           status,
           result
         ) {
+          // 可以通过地图搜索功能修改返回的数据
           // console.log(result);
         });
       });
@@ -185,6 +321,70 @@ export default {
       width: 100%;
       height: 300px;
       overflow: auto;
+    }
+  }
+  .hotelmsg {
+    margin-top: 20px;
+    .haveborder {
+      border-bottom: 1px solid #eee;
+      .haveborderson {
+        padding: 20px 10px;
+        font-size: 14px;
+        .sons {
+          color: #666;
+          padding-left: 5px;
+          padding-right: 5px;
+        }
+        .assitem {
+          border: 1px solid #eee;
+          padding: 4px 10px;
+          margin-right: 10px;
+          border-radius: 4px;
+          background-color: #eee;
+          color: #666;
+        }
+      }
+    }
+  }
+  .remarks {
+    margin-top: 20px;
+    h2 {
+      margin-bottom: 15px;
+      font-size: 16px;
+    }
+    .allremarks {
+      color: #666;
+    }
+    .mystars {
+      position: relative;
+      .stamp {
+        color: #fa3;
+        font-size: x-large;
+        position: absolute;
+        left: 20px;
+        top: -28px;
+        border: 2px solid #fa3;
+        text-align: center;
+        line-height: 70px;
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        opacity: 0.25;
+        transform: rotate(-30deg);
+      }
+    }
+    .ratebox {
+      position: relative;
+      width: 70px;
+      height: 70px;
+      .ratetext {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        text-align: center;
+        transform: translate(-50%, -50%);
+        color: #f90;
+      }
     }
   }
 }
