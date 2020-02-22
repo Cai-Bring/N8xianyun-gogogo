@@ -1,0 +1,16 @@
+{
+  "id": "1650363",
+  "name": "闲云",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "689247",
+      "name": "皇冠",
+      "font_class": "huangguan",
+      "unicode": "e7eb",
+      "unicode_decimal": 59371
+    }
+  ]
+}

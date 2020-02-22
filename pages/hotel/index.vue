@@ -19,7 +19,7 @@
           :default-time="['00:00:00', '23:59:59']"
           :picker-options="pickerOptions">
         </el-date-picker>
-        <div class="numberOfPeople">
+        <div class="numberOfPeople" :style="numberOfPeopleChange && 'border-color:#38f'">
           <div @click.stop="numberOfPeopleChange=!numberOfPeopleChange" style="width:100%">
             <span :style="numberOfPeopleChangeOk ? 'color:#606266' : ''">{{numberOfPeopleChangeOk ? numberOfPeopleChangeOk : '人数未定'}}</span>
             <span class="el-icon-user"></span>
@@ -49,6 +49,66 @@
         </div>
         <el-button type="primary" @click="hotelPrice">查看价格</el-button>
     </div>
+    <div class="evaluateAndMap">
+      <div class="evaluate">
+        <div class="clearfix">
+          <span>区域:</span>
+          <div class="evaluateAll">
+            <div class="evaluateAllA" :style="evaluateAllAOen ? `height: 60px;` : ''" v-if="cityScenics.length !== 0">
+              <a href="javascrip:;" v-for="(v,i) in cityScenics" :key="i">{{v.name}}</a>
+            </div>
+            <div @click="evaluateAllAOen=!evaluateAllAOen" style="width:98px">
+              <span class="el-icon-d-arrow-right evaluateAllOpenDwon" :style="evaluateAllAOen ? '' : `transform: rotate(270deg)`"></span>
+              <span class="evaluateAllOpen">等{{cityScenics.length}}个区域 </span>
+            </div>
+          </div>
+        </div>
+        <div class="averagePrice">
+          <div style="display: inline-block;">
+            <span>均价</span>
+            <el-tooltip class="item" effect="dark" content="等级均价由平日价格计算得出，节假日价格会有上浮。" placement="right-start">
+              <span class="el-icon-question"></span>
+            </el-tooltip>:
+            &nbsp;
+          </div>
+          <div class="crown">
+            <el-tooltip class="item" effect="dark" content="等级评定是针对房价，设施和服务等各方面水平的综合评估。" placement="top">
+              <span>
+              <span class="iconfont icon-huangguan"></span>
+              <span class="iconfont icon-huangguan"></span>
+              <span class="iconfont icon-huangguan"></span>
+              <b>¥332</b>
+            </span>
+            </el-tooltip>
+            &nbsp;&nbsp;
+            <el-tooltip class="item" effect="dark" content="等级评定是针对房价，设施和服务等各方面水平的综合评估。" placement="top">
+              <span>
+              <span class="iconfont icon-huangguan"></span>
+              <span class="iconfont icon-huangguan"></span>
+              <span class="iconfont icon-huangguan"></span>
+              <span class="iconfont icon-huangguan"></span>
+              <b>¥521</b>
+            </span>
+            </el-tooltip>
+            &nbsp;&nbsp;
+            <el-tooltip class="item" effect="dark" content="等级评定是针对房价，设施和服务等各方面水平的综合评估。" placement="top">
+              <span>
+              <span class="iconfont icon-huangguan"></span>
+              <span class="iconfont icon-huangguan"></span>
+              <span class="iconfont icon-huangguan"></span>
+              <span class="iconfont icon-huangguan"></span>
+              <span class="iconfont icon-huangguan"></span>
+              <b>¥768</b>
+            </span>
+            </el-tooltip>
+          </div>
+        </div>
+      </div>
+      <div class="map">
+        <div id="container"></div>
+      </div>
+      <span class="clearfix"></span>
+    </div>
   </div>
 </template>
 
@@ -59,6 +119,7 @@ export default {
       usermaplocation: {},
       city: '',
       cityID: '',
+      cityScenics: [],
       searchCity: '',
       time: '',
       pickerOptions: {
@@ -69,7 +130,11 @@ export default {
       numberOfPeople: '2成人',
       numberOfPeople2: '0儿童',
       numberOfPeopleChangeOk: '',
-      numberOfPeopleChange: false
+      numberOfPeopleChange: false,
+      evaluateAllAOen: true,
+      hotel: {
+        location:[]
+      }
     };
   },
   mounted() {
@@ -77,9 +142,14 @@ export default {
     if (this.$route.query.city) {
       this.getCity(`/cities?name=${this.$route.query.city}`,(res) => {
         this.cityID = res.data.data[0].id
-        this.getHotel({city: this.cityID}, ()=>{
+        this.cityScenics = res.data.data[0].scenics
+        this.getHotel({city: this.cityID}, (res)=>{
           // 城市的数据
-          console.log(res.data.data)
+          this.hotel.hotels = res.data.data
+          this.hotel.location = res.data.data.map(v => {
+            return [v.location.longitude, v.location.latitude]
+          })
+          this.getMap()
         })
       })
     }
@@ -91,10 +161,10 @@ export default {
     }
     this.city = this.$route.query.city
     window.onLoad = () => {
-      var map = new AMap.Map("container");
       this.maplocation()
     };
-    this.init()
+    // 引入地图API
+    this.init("https://webapi.amap.com/maps?v=1.4.15&key=9623915ac82517f2e7ba4b95ef9ed725&callback=onLoad")
   },
   methods: {
     maplocation() {
@@ -114,9 +184,7 @@ export default {
       });
       }
     },
-    init () {
-      var url =
-      "https://webapi.amap.com/maps?v=1.4.15&key=9623915ac82517f2e7ba4b95ef9ed725&callback=onLoad";
+    init (url) {
       var jsapi = document.createElement("script");
       jsapi.charset = "utf-8";
       jsapi.src = url;
@@ -148,7 +216,7 @@ export default {
       this.searchCity = ''
     },
     hotelPrice () {
-      let params= {}
+      let params= {city: this.cityID}
       if (this.time) {
         params= {
           enterTime: `${this.time[0].getFullYear()}-${this.time[0].getMonth()+1}-${this.time[0].getDate()}`,
@@ -180,6 +248,35 @@ export default {
         }).then(res => {
           callback(res)
         })
+    },
+    getMap (map) {
+      map =  map ? map : new AMap.Map("container")
+      var lnglats = this.hotel.location;
+      var infoWindow = new AMap.InfoWindow({offset: new AMap.Pixel(0, -30)});
+      for (var i = 0, marker; i < lnglats.length; i++) {
+          var marker = new AMap.Marker({
+              position: lnglats[i],
+              map: map,
+              content: '' +
+              '<div class="custom-content-marker" style="width: 25px;position: relative;height: 34px;">' +
+              '   <img style="width: 100%;height: 100%;" src="//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png">' +
+              `   <div class="close-btn" style="position: absolute;top: 0px;left: 0px;color: #fff;width: 100%;height: 100%;text-align: center;">${i+1}</div>`+
+              '</div>'
+          });
+          marker.content = this.hotel.hotels[i].name;
+          marker.on('mouseover', markerClick);
+          marker.emit('mouseover', {target: marker});
+          marker.on('mouseout', markerout);
+          marker.emit('mouseout', {target: marker});
+      }
+    function markerClick(e) {
+      infoWindow.setContent(e.target.content);
+      infoWindow.open(map, e.target.getPosition());
+    }
+    function markerout(e) {
+      infoWindow.close(map, e.target.getPosition())
+    }
+    map.setFitView();
     }
   },
   watch: {
@@ -187,9 +284,14 @@ export default {
       this.city = this.$route.query.city
       this.getCity(`/cities?name=${this.$route.query.city}`,(res) => {
         this.cityID = res.data.data[0].id
-        this.getHotel({city: this.cityID}, ()=>{
+        this.cityScenics = res.data.data[0].scenics
+        this.getHotel({city: this.cityID}, (res)=>{
           // 城市的数据
-          console.log(res)
+          this.hotel.hotels = res.data.data
+          this.hotel.location = res.data.data.map(v => {
+            return [v.location.longitude, v.location.latitude]
+          })
+          this.getMap()
         })
       })
     }
@@ -220,7 +322,7 @@ export default {
         top: 50px;
         left: 0;
         background-color: #fff;
-        z-index: 10;
+        z-index: 300;
         border-radius: 4px;
         box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
         color: #606266;
@@ -252,5 +354,67 @@ export default {
       font-size: 20px;
     }
   }
+  .evaluateAndMap{
+    margin-top: 20px;
+    width: 100%;
+    .evaluate{
+      color: #666;
+      float: left;
+      width: 650px;
+      background-color: #fff;
+      font-size: 14px;
+      a{
+        display: inline-block;
+        font-size: 14px;
+        margin-right: 20px;
+        padding: 5px 0;
+        &:hover{
+          color: #38f;
+          text-decoration: underline;
+        }
+      }
+      .evaluateAll{
+        float: right;
+        width: 600px;
+        .evaluateAllOpenDwon{
+          color: #f90;
+          transform: rotate(90deg)
+        }
+        .evaluateAllA{
+          overflow: hidden;
+        }
+      }
+      .evaluateAllOpen{
+          cursor: pointer;
+        }
+        .averagePrice{
+          margin-top: 20px;
+          .crown{
+            color: #f90;
+            display: inline-block;
+            b{
+              color: #666;
+            }
+          }
+        }
+    }
+    .map{
+      float: right;
+      width: 350px;
+      height: 300px;
+      #container {
+        width:350px;
+        height: 100%;
+      }  
+    }
+    .clearfix::after{
+        content: "";
+        display: block;
+        height: 0;
+        clear: both;
+        visibility: hidden;
+      }
+  }
 }
+
 </style>
