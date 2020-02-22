@@ -60,7 +60,7 @@
         <el-row type="flex" justify="center">
           <div class="ctrl-item">
             <i class="el-icon-edit"></i>
-            <p>评论()</p>
+            <p>评论({{detailData.comments.length}})</p>
           </div>
           <div class="ctrl-item">
             <i class="el-icon-share"></i>
@@ -86,7 +86,9 @@ import recommendList from "@/components/post/recommendList.vue";
 export default {
   data() {
     return {
-      detailData: {}
+      detailData: {
+        comments: []
+      }
     };
   },
   components: {

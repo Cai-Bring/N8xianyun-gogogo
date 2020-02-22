@@ -47,6 +47,7 @@ import { dateFormat } from "@/assets/filters.js";
 import commentParent from "@/components/post/commentParent.vue";
 
 export default {
+  props: ["emitNum"],
   data() {
     return {
       currentPage: 1,
@@ -61,6 +62,11 @@ export default {
   },
   filters: {
     dateFormat
+  },
+  watch: {
+    emitNum() {
+      this.getCommentsData();
+    }
   },
   methods: {
     // 调用接口获取数据
