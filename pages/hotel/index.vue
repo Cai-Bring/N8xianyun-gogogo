@@ -109,10 +109,66 @@
       </div>
       <span class="clearfix"></span>
     </div>
+    <div class="screen">
+      <el-row type="flex" class="row-bg">
+        <el-col :span="8"><div class="grid-content bg-purple">
+          <div class="Slider screenUnified">
+            <div class="Slidertitle">
+              <span>价格</span>
+              <span class="hotelPricekey">0-{{hotelPricekey*40}}</span>
+            </div>
+            <el-slider v-model="hotelPricekey" :format-tooltip="formatTooltip" @change="getComplexHotel"></el-slider>
+          </div>
+        </div></el-col>
+        <el-col :span="6"><div class="grid-content bg-purple-light">
+          <div class="screenUnified">
+            <div>
+              <span>住宿等级</span>
+            </div>
+            <div style="height:38px">
+              <selects :num="onehotelselect.levels"
+              :eventName="'AccommodationLevel'" @AccommodationLevel="dataProcessing"></selects>
+            </div>
+          </div>
+        </div></el-col>
+        <el-col :span="6"><div class="grid-content bg-purple">
+          <div class="screenUnified">
+            <div>
+              <span>住宿类型</span>
+            </div>
+            <div style="height:38px">
+              <selects :num="onehotelselect.types" :eventName="'hoteltype'" @hoteltype="dataProcessing"></selects>
+            </div>
+          </div>
+          </div></el-col>
+        <el-col :span="6"><div class="grid-content bg-purple-light">
+          <div class="screenUnified">
+            <div>
+              <span>酒店设施</span>
+            </div>
+            <div style="height:38px">
+              <selects :num="onehotelselect.assets" :eventName="'hotelasset'" @hotelasset="dataProcessing"></selects>
+            </div>
+          </div>
+          </div></el-col>
+        <el-col :span="6"><div class="grid-content bg-purple">
+          <div class="screenUnified" style="border-right:0">
+            <div>
+              <span>酒店品牌</span>
+            </div>
+            <div style="height:38px">
+              <selects2 :num="onehotelselect.brands" :eventName="'hotelbrand'" @hotelbrand="dataProcessing"></selects2>
+            </div>
+          </div>
+          </div></el-col>
+      </el-row>
+    </div>
   </div>
 </template>
 
 <script>
+import selects from '../../components/hotel/select'
+import selects2 from '../../components/hotel/select2'
 export default {
   data() {
     return {
@@ -133,7 +189,21 @@ export default {
       numberOfPeopleChange: false,
       evaluateAllAOen: true,
       hotel: {
-        location:[]
+        location:[],
+      },
+      hotelPricekey: 100,
+      onehotelselectOk: {
+        price: 4000,
+        levels: [],
+        types: [],
+        assets: [],
+        brands: []
+      },
+      onehotelselect: {
+        levels: [],
+        types: [],
+        assets: [],
+        brands: []
       }
     };
   },
@@ -165,6 +235,11 @@ export default {
     };
     // 引入地图API
     this.init("https://webapi.amap.com/maps?v=1.4.15&key=9623915ac82517f2e7ba4b95ef9ed725&callback=onLoad")
+    this.$axios({
+          url: `/hotels/options`
+        }).then(res => {
+          this.onehotelselect = res.data.data
+        })
   },
   methods: {
     maplocation() {
@@ -260,7 +335,7 @@ export default {
               content: '' +
               '<div class="custom-content-marker" style="width: 25px;position: relative;height: 34px;">' +
               '   <img style="width: 100%;height: 100%;" src="//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png">' +
-              `   <div class="close-btn" style="position: absolute;top: 0px;left: 0px;color: #fff;width: 100%;height: 100%;text-align: center;">${i+1}</div>`+
+              `   <div class="close-btn" style="line-height: 25px;position: absolute;top: 0px;left: 0px;color: #fff;width: 100%;height: 100%;text-align: center;">${i+1}</div>`+
               '</div>'
           });
           marker.content = this.hotel.hotels[i].name;
@@ -269,14 +344,62 @@ export default {
           marker.on('mouseout', markerout);
           marker.emit('mouseout', {target: marker});
       }
-    function markerClick(e) {
-      infoWindow.setContent(e.target.content);
-      infoWindow.open(map, e.target.getPosition());
-    }
-    function markerout(e) {
-      infoWindow.close(map, e.target.getPosition())
-    }
-    map.setFitView();
+        function markerClick(e) {
+          infoWindow.setContent(e.target.content);
+          infoWindow.open(map, e.target.getPosition());
+        }
+        function markerout(e) {
+          infoWindow.close(map, e.target.getPosition())
+        }
+        map.setFitView();
+    },
+    formatTooltip(val) {
+      this.onehotelselectOk.price = val * 40;
+      return val * 40;
+    },
+    dataProcessing (data,name) {
+      if (name === 'AccommodationLevel') {
+        this.onehotelselectOk.levels = data
+      } else if (name === 'hoteltype') {
+        this.onehotelselectOk.types = data
+      } else if (name === 'hotelasset') {
+        this.onehotelselectOk.assets = data
+      } else {
+        this.onehotelselectOk.brands = data
+      }
+      this.getComplexHotel()
+    },
+    getComplexHotel() {
+      // console.log(this.onehotelselectOk)
+      let parameter = `city=${this.cityID}&`
+      for (let key in this.onehotelselectOk) {
+        if (key === 'price') {
+          parameter += `price_lt=${this.onehotelselectOk[key]}&`
+        } else if (this.onehotelselectOk[key].length !== 0) {
+          if (key === 'levels') {
+            this.onehotelselectOk[key].forEach(v => {
+              parameter += `hotellevel=${v}&`
+            })
+          } else if (key === 'types') {
+            this.onehotelselectOk[key].forEach(v => {
+              parameter += `hoteltype=${v}&`
+            })
+          } else if (key === 'assets') {
+            this.onehotelselectOk[key].forEach(v => {
+              parameter += `hotelasset=${v}&`
+            })
+          } else {
+            this.onehotelselectOk[key].forEach(v => {
+              parameter += `hotelbrand=${v}&`
+            })
+          }
+        }
+      }
+      this.$axios({
+          url: `/hotels?${parameter}`,
+        }).then(res => {
+          console.log(res);
+        })
     }
   },
   watch: {
@@ -295,7 +418,11 @@ export default {
         })
       })
     }
-  }
+  },
+  components: {
+    selects,
+    selects2,
+  },
 };
 </script>
 
@@ -415,6 +542,26 @@ export default {
         visibility: hidden;
       }
   }
+  .screen{
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    margin-top: 30px;
+    padding: 5px 0;
+    color:#666;
+    .screenUnified{
+      height: 68px;
+      border-right: 1px solid #ccc;
+      box-sizing: border-box;
+      padding: 5px 20px;
+      font-size: 14px;
+      .Slidertitle{
+        .hotelPricekey{
+          float: right;
+        }
+      }
+    }
+  }
+  
 }
 
 </style>
