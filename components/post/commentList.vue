@@ -2,6 +2,8 @@
   <div>
     <div class="cmt-list">
       <div class="cmt-item" v-for="(item,index) in commentsList" :key="index">
+        <!-- 回复内容parent -->
+        <commentParent :parent="item.parent" v-if="item.parent" @sendComment="replyComment"></commentParent>
         <div class="cmt-info">
           <img :src="`http://127.0.0.1:1337${item.account.defaultAvatar}`" />
           {{item.account.nickname}}
@@ -9,9 +11,6 @@
           <span>{{item.level}}</span>
         </div>
         <div class="cmt-content">
-          <!-- 回复内容parent -->
-          <commentParent :parent="item.parent" v-if="item.parent"></commentParent>
-
           <!-- 回复内容 -->
           <div class="cmt-new">
             <p class="cmt-message" v-html="item.content"></p>
@@ -21,7 +20,38 @@
               </div>
             </el-row>
             <div class="cmt-ctrl">
-              <a href="javascript:;">回复</a>
+              <a href="javascript:;" @click="dialogVisible2 = true,parentId = item.id">回复</a>
+
+              <el-dialog :visible.sync="dialogVisible2" width="40%">
+                <el-input
+                  autocomplete="off"
+                  type="textarea"
+                  :rows="2"
+                  placeholder="输入您要回复的内容"
+                  v-model="textarea"
+                  resize="none"
+                  style="margin-bottom:10px;"
+                ></el-input>
+                <el-row type="flex" class="cmt-input-ctrls" justify="space-between">
+                  <el-upload
+                    action="http://127.0.0.1:1337/upload"
+                    name="files"
+                    list-type="picture-card"
+                    :on-preview="handlePictureCardPreview"
+                    :on-remove="handleRemove"
+                    :on-success="handleUpload"
+                  >
+                    <i class="el-icon-plus"></i>
+                  </el-upload>
+                  <el-dialog :visible.sync="dialogVisible1">
+                    <img width="100%" :src="dialogImageUrl" alt />
+                  </el-dialog>
+                </el-row>
+                <span slot="footer" class="dialog-footer">
+                  <el-button @click="dialogVisible2 = false">取 消</el-button>
+                  <el-button type="primary" @click="handleComment(parentId)">回 复</el-button>
+                </span>
+              </el-dialog>
             </div>
           </div>
         </div>
@@ -53,8 +83,13 @@ export default {
       currentPage: 1,
       pageSize: 5,
       commentsTotal: 0,
-      commentsList: []
-      // showIndex: null
+      commentsList: [],
+      textarea: "",
+      pictureList: [],
+      dialogImageUrl: "",
+      dialogVisible1: false,
+      dialogVisible2: false,
+      parentId: null
     };
   },
   components: {
@@ -95,16 +130,70 @@ export default {
       // console.log(val);
       this.currentPage = val;
       this.getCommentsData();
+    },
+    // 照片上传成功的回调
+    handleUpload(response, file, fileList) {
+      //   console.log(response);
+      //   console.log(file);
+      //   console.log(fileList);
+      this.pictureList = fileList.map(val => {
+        return { ...val.response[0] };
+      });
+    },
+    handlePictureCardPreview(file) {
+      // console.log(file);
+      this.dialogImageUrl = file.url;
+      this.dialogVisible = true;
+    },
+    handleRemove(file, fileList) {
+      // console.log(file, fileList);
+      this.pictureList = fileList.map(val => {
+        return { ...val.response[0] };
+      });
+    },
+    replyComment(id) {
+      // console.log(id);
+      this.dialogVisible2 = true;
+      this.parentId = id;
+      console.log(this.parentId);
+    },
+    // 回复评论
+    handleComment(id) {
+      if (this.$store.state.user.userInfo.token) {
+        this.$axios({
+          url: "/comments",
+          method: "POST",
+          headers: {
+            Authorization: "Bearer " + this.$store.state.user.userInfo.token,
+            "Content-Type": "application/json"
+          },
+          data: {
+            content: this.textarea,
+            pics: this.pictureList,
+            follow: id,
+            post: this.$route.query.id
+          }
+        }).then(res => {
+          // console.log(res);
+          this.$message({
+            message: "恭喜你，口吐芬芳成功",
+            type: "success"
+          });
+          this.textarea = "";
+          this.parentId = null;
+          this.dialogVisible2 = false;
+          this.getCommentsData();
+        });
+      } else {
+        this.$confirm("未登录无法评论，是否跳转登录", "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning"
+        }).then(() => {
+          this.$router.push("/user/login");
+        });
+      }
     }
-    // 显示回复按钮
-    // showReply(index) {
-    //   // console.log(index);
-    //   this.showIndex = index;
-    // },
-    // notShowReply(index) {
-    //   // console.log(index);
-    //   this.showIndex = null;
-    // }
   },
   mounted() {
     this.getCommentsData();
@@ -176,5 +265,10 @@ export default {
       text-align: right;
     }
   }
+}
+/deep/.el-upload--picture-card {
+  width: 75px;
+  height: 75px;
+  line-height: 75px;
 }
 </style>
