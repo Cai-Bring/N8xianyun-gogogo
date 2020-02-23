@@ -2,10 +2,11 @@
   <div>
     <div class="cmt-list">
       <div class="cmt-item" v-for="(item,index) in commentsList" :key="index">
-        <!-- 回复内容parent -->
+        <!-- 回复的回复 -->
         <commentParent :parent="item.parent" v-if="item.parent" @sendComment="replyComment"></commentParent>
+        
         <div class="cmt-info">
-          <img :src="`http://127.0.0.1:1337${item.account.defaultAvatar}`" />
+          <img :src="`${$axios.defaults.baseURL}${item.account.defaultAvatar}`" />
           {{item.account.nickname}}
           <i>{{item.created_at | dateFormat}}</i>
           <span>{{item.level}}</span>
@@ -57,7 +58,7 @@
         </div>
       </div>
     </div>
-
+    <!-- 分页 -->
     <el-row type="flex" justify="center" style="margin-top:10px" v-if="commentsTotal!=0">
       <el-pagination
         @size-change="handleSizeChange"
@@ -140,11 +141,13 @@ export default {
         return { ...val.response[0] };
       });
     },
+    // 点击文件列表中已上传的文件时的钩子
     handlePictureCardPreview(file) {
       // console.log(file);
       this.dialogImageUrl = file.url;
       this.dialogVisible = true;
     },
+    // 文件列表移除文件时的钩子
     handleRemove(file, fileList) {
       // console.log(file, fileList);
       this.pictureList = fileList.map(val => {

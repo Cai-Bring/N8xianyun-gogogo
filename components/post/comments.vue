@@ -1,16 +1,18 @@
 <template>
   <div class="cmt-wrapper">
     <h4 class="cmt-title">评论</h4>
+    <!-- 文本域 -->
     <div class="cmt-input">
       <el-input
         autocomplete="off"
         type="textarea"
         :rows="2"
-        placeholder="说点什么吧..."
+        placeholder="请开始你的表演"
         v-model="textarea"
         resize="none"
       ></el-input>
     </div>
+    <!-- 图片上传 -->
     <el-row type="flex" class="cmt-input-ctrls" justify="space-between">
       <el-upload
         :action="`${$axios.defaults.baseURL}/upload`"
@@ -52,6 +54,7 @@ export default {
     commentList
   },
   methods: {
+    // 文件上传成功时的钩子
     handleUpload(response, file, fileList) {
       //   console.log(response);
       //   console.log(file);
@@ -60,18 +63,22 @@ export default {
         return { ...val.response[0] };
       });
     },
+    // 点击文件列表中已上传的文件时的钩子
     handlePictureCardPreview(file) {
       // console.log(file);
       this.dialogImageUrl = file.url;
       this.dialogVisible = true;
     },
+    // 文件列表移除文件时的钩子
     handleRemove(file, fileList) {
       // console.log(file, fileList);
       this.pictureList = fileList.map(val => {
         return { ...val.response[0] };
       });
     },
+    // 评论
     handleComment() {
+      // 判断是否登录
       if (this.$store.state.user.userInfo.token) {
         this.$axios({
           url: "/comments",

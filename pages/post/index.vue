@@ -12,7 +12,7 @@
         <StrategyInput @seek="inputSeek" />
         <div class="h4">
           <h4>推荐攻略</h4>
-          <el-button type="primary" icon="el-icon-edit">写游记</el-button>
+          <el-button type="primary" icon="el-icon-edit" @click="$router.push({path:'post/create'})">写游记</el-button>
         </div>
         <!-- 循环文章列表 -->
         <ArticleList v-for="(value,index) in wenzhangList" :data="value" :key="index" />
