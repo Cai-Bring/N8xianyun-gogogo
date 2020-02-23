@@ -47,7 +47,7 @@
             </div>
           </div>
         </div>
-        <el-button type="primary" @click="hotelPrice">查看价格</el-button>
+        <el-button type="primary" @click="getComplexHotel">查看价格</el-button>
     </div>
     <div class="evaluateAndMap">
       <div class="evaluate">
@@ -163,6 +163,94 @@
           </div></el-col>
       </el-row>
     </div>
+    <div class="hotelAllList">
+      <div class="onHotelList" v-for="v in hotel.hotels" :key="v.id">
+        <el-row type="flex" class="row-bg">
+          <el-col :span="8"><div class="grid-content bg-purple">
+            <div class="onHotelListOut">
+              <img :src="v.photos" alt="" @click="toHoteldetails(v.id)">
+            </div>
+          </div></el-col>
+          <el-col :span="10"><div class="grid-content bg-purple-light">
+            <div class="onHotelListMiddle">
+              <h4 @click="toHoteldetails(v.id)">{{v.name}}</h4>
+              <div class="alias">
+                <span>{{v.alias}}</span>
+                <span class="aliasiconfont">
+                  <span class="iconfont icon-huangguan" v-for="v in v.hoteltype.id" :key="v"></span>
+                </span>
+                <span>{{v.hoteltype.name}}</span>
+              </div>
+              <div class="star">
+                <div class="starToStar">
+                  <div class="starToStarUp">
+                    <span class="el-icon-star-on" style="color: #ccc;"
+                    v-for="v in 5" :key="v"></span>
+                  </div>
+                  <div class="starToStarDwon">
+                    <div :style="`width: ${v.stars/5*80}px;`">
+                      <div>
+                        <span class="el-icon-star-on" style="color: #f90;"
+                    v-for="v in 5" :key="v"></span>
+                    </div>
+                      </div>
+                  </div>
+                </div>
+                <span style="color: #f90;font-size: 14px;">{{v.stars}}分</span>
+                <span style="margin: 0 25px;">
+                  <span style="color: #f90;">10</span>
+                  <span>条评价</span>
+                </span>
+                <span>
+                  <span style="color: #f90;">10</span>
+                  <span>篇游记</span>
+                </span>
+              </div>
+              <div style="color: #666;font-size: 14px;margin-top: 15px;">
+                <span class="el-icon-location" style="color: #333;font-size: 16px;"></span>
+                <span>位于:</span>
+                <span>{{v.address}}</span>
+              </div>
+            </div>
+          </div></el-col>
+          <el-col :span="6"><div class="grid-content bg-purple-light">
+            <div class="onHotelListOut">
+              <div class="onHotelListOutRight">
+                <a :href="hrefDo(item.name)" v-for="(item,index) in v.products" :key="index" target="_blank">
+                  <div>
+                  <div>
+                    <span>{{item.name}}</span>
+                    <span style="float:right">
+                      <span style="color: #f90;">¥{{item.price}}</span>
+                      <span>起</span>
+                      <span class="el-icon-arrow-right"></span>
+                    </span>
+                  </div>
+                </div>
+                </a>
+              </div>
+            </div>
+          </div></el-col>
+        </el-row>
+      </div>
+      <div class="noonHotelList" v-if="hotel.hotels.length === 0 && noonHotelList">
+        <span>
+          <span>没有</span>
+          <span style="color: #38f;font-size: 18px;">{{city}}</span>
+          <span>的酒店数据。。。。。。</span>
+        </span>
+      </div>
+    </div>
+    <div class="Pagination" v-if="hotel.hotels.length !== 0">
+      <div class="PaginationRight">
+        <el-pagination
+          background
+          layout="prev, pager, next"
+          :total="hotel.total"
+          @current-change="PaginationTo">
+        </el-pagination>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -172,6 +260,7 @@ import selects2 from '../../components/hotel/select2'
 export default {
   data() {
     return {
+      noonHotelList: false,
       usermaplocation: {},
       city: '',
       cityID: '',
@@ -190,6 +279,8 @@ export default {
       evaluateAllAOen: true,
       hotel: {
         location:[],
+        hotels: [],
+        nextStart: ''
       },
       hotelPricekey: 100,
       onehotelselectOk: {
@@ -215,11 +306,7 @@ export default {
         this.cityScenics = res.data.data[0].scenics
         this.getHotel({city: this.cityID}, (res)=>{
           // 城市的数据
-          this.hotel.hotels = res.data.data
-          this.hotel.location = res.data.data.map(v => {
-            return [v.location.longitude, v.location.latitude]
-          })
-          this.getMap()
+          this.DoHotelData(res)
         })
       })
     }
@@ -289,20 +376,6 @@ export default {
     handleSelect(item) {
       this.$router.push({name:'hotel', query:{city: item.allName}})
       this.searchCity = ''
-    },
-    hotelPrice () {
-      let params= {city: this.cityID}
-      if (this.time) {
-        params= {
-          enterTime: `${this.time[0].getFullYear()}-${this.time[0].getMonth()+1}-${this.time[0].getDate()}`,
-          leftTime: `${this.time[1].getFullYear()}-${this.time[1].getMonth()+1}-${this.time[1].getDate()}`,
-          city: this.cityID
-        } 
-      }
-      this.getHotel(params, (res)=>{
-        // 城市的数据
-        console.log(res.data.data)
-      })
     },
     numberOfPeopleChangeOkFun () {
       this.numberOfPeopleChange = false
@@ -395,26 +468,59 @@ export default {
           }
         }
       }
+      if (this.time) {
+        parameter += `enterTime=${this.time[0].getFullYear()}-${this.time[0].getMonth()+1}-${this.time[0].getDate()}&`
+        parameter += `leftTime=${this.time[1].getFullYear()}-${this.time[1].getMonth()+1}-${this.time[1].getDate()}&`
+      }
+      parameter += `_start=${this.hotel.nextStart}&`
       this.$axios({
           url: `/hotels?${parameter}`,
         }).then(res => {
-          console.log(res);
+          this.DoHotelData(res)
         })
+    },
+    hrefDo (key) {
+      if (key === '携程') {
+        return 'https://www.ctrip.com/'
+      } else if (key === '艺龙') {
+        return 'http://www.elong.com/'
+      } else {
+        return 'https://www.hotels.cn/'
+      }
+    },
+    DoHotelData (res) {
+      console.log(res);
+      
+      this.hotel.hotels = res.data.data
+      this.hotel.location = res.data.data.map(v => {
+        return [v.location.longitude, v.location.latitude]
+      })
+      if (this.hotel.hotels.length === 0) {
+        this.noonHotelList = true
+      } else {
+        this.hotel.total = res.data.total
+        this.noonHotelList = false
+        this.getMap()
+      }
+    },
+    toHoteldetails (id) {
+      this.$router.push({path: '/hotel/hotelDetails', query: {id}})
+    },
+    PaginationTo (key) {
+      this.hotel.nextStart = key * 10 - 10
+      this.getComplexHotel()
     }
   },
   watch: {
     '$route.query' () {
       this.city = this.$route.query.city
+      this.noonHotelList = false
       this.getCity(`/cities?name=${this.$route.query.city}`,(res) => {
         this.cityID = res.data.data[0].id
         this.cityScenics = res.data.data[0].scenics
         this.getHotel({city: this.cityID}, (res)=>{
           // 城市的数据
-          this.hotel.hotels = res.data.data
-          this.hotel.location = res.data.data.map(v => {
-            return [v.location.longitude, v.location.latitude]
-          })
-          this.getMap()
+          this.DoHotelData(res)
         })
       })
     }
@@ -559,6 +665,93 @@ export default {
           float: right;
         }
       }
+    }
+  }
+  .hotelAllList{
+    .onHotelList{
+      padding: 25px 0;
+      border-bottom: 1px solid #ccc;
+    }
+    .onHotelListOut{
+      height: 215px;
+      img{
+        height: 100%;
+        width: 100%;
+        cursor: pointer;
+      }
+    }
+    .onHotelListMiddle{
+      padding: 0 10px;
+      h4{
+        font-size: x-large;
+        cursor: pointer;
+      }
+      .alias{
+        color: #999;
+        font-size: 16px;
+        font-weight: 100;
+        margin-bottom: 10px;
+        .aliasiconfont{
+          margin-left: 5px;
+          color: #f90;
+        }
+      }
+      .star{
+        .starToStar{
+          position: relative;
+          display: inline-block;
+          width: 90px;
+          font-size: 16px;
+          .starToStarDwon{
+            position: absolute;
+            top: 0;
+            left: 0;
+            &>div{
+              white-space: nowrap;
+              overflow: hidden;
+              
+            }
+          }
+        }
+      }
+
+    }
+    .onHotelListOutRight{
+      margin-top: 20px;
+      padding-left: 10px;
+      padding-right: 10px;
+      &>a{
+        display: block;
+        &>div{
+        height: 50px;
+        padding: 12px 10px;
+        font-size: 17px;
+        line-height: 25px;
+        box-sizing: border-box;
+        border-bottom: 1px solid #ccc;
+        cursor: pointer;
+        &:hover{
+          background-color: #ccc;
+        }
+        &>div{
+          height: 100%;
+        }
+      }
+      }
+    }
+    .noonHotelList{
+      margin-top: 20px;
+      height: 60px;
+      line-height: 60px;
+      text-align: center;
+    }
+  }
+  .Pagination{
+    margin-top: 10px;
+    padding: 10px 0;
+    height: 32px;
+    .PaginationRight{
+      float: right;
     }
   }
   

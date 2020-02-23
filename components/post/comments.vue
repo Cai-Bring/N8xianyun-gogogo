@@ -13,7 +13,7 @@
     </div>
     <el-row type="flex" class="cmt-input-ctrls" justify="space-between">
       <el-upload
-        action="http://127.0.0.1:1337/upload"
+        :action="`${$axios.defaults.baseURL}/upload`"
         name="files"
         list-type="picture-card"
         :on-preview="handlePictureCardPreview"
@@ -91,6 +91,8 @@ export default {
             message: "恭喜你，口吐芬芳成功",
             type: "success"
           });
+          this.textarea = "";
+          this.pictureList = [];
           this.emitNum++;
         });
       } else {
