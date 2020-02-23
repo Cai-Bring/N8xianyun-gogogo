@@ -16,7 +16,7 @@
             <p class="cmt-message" v-html="item.content"></p>
             <el-row type="flex">
               <div class="cmt-pic" v-for="(pic,index) in item.pics" :key="index">
-                <img :src="`http://127.0.0.1:1337${pic.url}`" />
+                <img :src="`${$axios.defaults.baseURL}${pic.url}`" />
               </div>
             </el-row>
             <div class="cmt-ctrl">
@@ -34,7 +34,7 @@
                 ></el-input>
                 <el-row type="flex" class="cmt-input-ctrls" justify="space-between">
                   <el-upload
-                    action="http://127.0.0.1:1337/upload"
+                    :action="`${$axios.defaults.baseURL}/upload`"
                     name="files"
                     list-type="picture-card"
                     :on-preview="handlePictureCardPreview"
