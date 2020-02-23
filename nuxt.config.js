@@ -34,6 +34,7 @@ export default {
   plugins: [
     '@/plugins/element-ui',
     { src: '@/plugins/localStorage', ssr: false },
+    { src: '~/plugins/vue-editor.js', mode: 'client' },
     "@/plugins/axios"
   ],
   /*
