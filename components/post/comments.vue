@@ -72,26 +72,36 @@ export default {
       });
     },
     handleComment() {
-      this.$axios({
-        url: "/comments",
-        method: "POST",
-        headers: {
-          Authorization: "Bearer " + this.$store.state.user.userInfo.token,
-          "Content-Type": "application/json"
-        },
-        data: {
-          content: this.textarea,
-          pics: this.pictureList,
-          post: this.$route.query.id
-        }
-      }).then(res => {
-        // console.log(res);
-        this.$message({
-          message: "恭喜你，口吐芬芳成功",
-          type: "success"
+      if (this.$store.state.user.userInfo.token) {
+        this.$axios({
+          url: "/comments",
+          method: "POST",
+          headers: {
+            Authorization: "Bearer " + this.$store.state.user.userInfo.token,
+            "Content-Type": "application/json"
+          },
+          data: {
+            content: this.textarea,
+            pics: this.pictureList,
+            post: this.$route.query.id
+          }
+        }).then(res => {
+          // console.log(res);
+          this.$message({
+            message: "恭喜你，口吐芬芳成功",
+            type: "success"
+          });
+          this.emitNum++;
         });
-        this.emitNum++;
-      });
+      } else {
+        this.$confirm("未登录无法评论，是否跳转登录", "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning"
+        }).then(() => {
+          this.$router.push("/user/login");
+        });
+      }
     }
   }
 };

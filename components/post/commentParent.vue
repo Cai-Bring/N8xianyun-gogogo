@@ -2,7 +2,11 @@
   <div class="cmt-floor">
     <div class="cmt-content">
       <!-- 递归 -->
-      <commentParent :parent="parent.parent" v-if="parent.parent"></commentParent>
+      <commentParent
+        :parent="parent.parent"
+        v-if="parent.parent"
+        @sendComment="replyComment(parent.parent.id)"
+      ></commentParent>
 
       <div class="cmt-info">
         {{parent.account.nickname}}
@@ -16,7 +20,7 @@
         </div>
       </el-row>
       <div class="cmt-ctrl">
-        <a href="javascript:;">回复</a>
+        <a href="javascript:;" @click="replyComment(parent.id)">回复</a>
       </div>
     </div>
   </div>
@@ -30,6 +34,12 @@ export default {
   props: ["parent"],
   filters: {
     dateFormat
+  },
+  methods: {
+    replyComment(id) {
+      // console.log(id);
+      this.$emit("sendComment", id);
+    }
   }
 };
 </script>
