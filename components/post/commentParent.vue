@@ -1,7 +1,7 @@
 <template>
   <div class="cmt-floor">
     <div class="cmt-content">
-      <!-- 递归 -->
+      <!-- 组件递归 -->
       <commentParent
         :parent="parent.parent"
         v-if="parent.parent"
@@ -16,7 +16,7 @@
       <p class="cmt-message" v-html="parent.content"></p>
       <el-row type="flex">
         <div class="cmt-pic" v-for="(pic,index) in parent.pics" :key="index">
-          <img :src="`http://127.0.0.1:1337${pic.url}`" />
+          <img :src="`${$axios.defaults.baseURL}${pic.url}`" />
         </div>
       </el-row>
       <div class="cmt-ctrl">
@@ -36,6 +36,7 @@ export default {
     dateFormat
   },
   methods: {
+    // 组件递归事件,传递所回复评论的id
     replyComment(id) {
       // console.log(id);
       this.$emit("sendComment", id);
