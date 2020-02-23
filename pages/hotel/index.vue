@@ -644,12 +644,13 @@ export default {
   }
   .hotelAllList{
     .onHotelList{
-      padding: 25px 0;
+      padding: 25px 0 5px;
       border-bottom: 1px solid #ccc;
     }
     .onHotelListOut{
       height: 215px;
       img{
+        display: block;
         height: 100%;
         width: 100%;
         cursor: pointer;
