@@ -142,7 +142,8 @@ export default {
         max-width: 700px !important;
       }
 
-      img {
+      /deep/img {
+        width: 100%;
         margin: 10px 0;
       }
     }
