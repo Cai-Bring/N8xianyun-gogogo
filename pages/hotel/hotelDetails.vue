@@ -55,11 +55,14 @@
       <el-col style="margin-left:20px">
         <!-- 地图TAB栏 -->
         <el-tabs v-model="activeName" @tab-click="handleClick" :stretch="true">
-          <el-tab-pane label="风景" name="first"></el-tab-pane>
-          <el-tab-pane label="交通" name="second"></el-tab-pane>
+          <el-tab-pane label="风景" name="first">
+            <!-- 地图搜索栏 -->
+            <div id="panel" v-if="activeName==='first'"></div>
+          </el-tab-pane>
+          <el-tab-pane label="交通" name="second">
+            <div id="panel" v-if="activeName==='second'"></div>
+          </el-tab-pane>
         </el-tabs>
-        <!-- 地图搜索栏 -->
-        <div id="panel"></div>
       </el-col>
     </el-row>
 
@@ -116,11 +119,13 @@
     <div class="remarks">
       <h2>{{myhotel.all_remarks}}条真实用户评论</h2>
       <el-row type="flex" align="middle">
+        <!-- 好评数 -->
         <el-col :span="4" class="allremarks">
           <el-row>总评数：{{myhotel.all_remarks}}</el-row>
           <el-row>好评数：{{myhotel.good_remarks}}</el-row>
           <el-row>差评数：{{myhotel.bad_remarks}}</el-row>
         </el-col>
+        <!-- 推荐 -->
         <el-col :span="5" class="mystars">
           <el-rate
             v-model="value"
@@ -131,6 +136,7 @@
           ></el-rate>
           <div class="stamp" v-if="value>=4">推荐</div>
         </el-col>
+        <!-- 环境 -->
         <el-col :span="3">
           <div class="ratebox">
             <el-progress
@@ -147,6 +153,7 @@
             </div>
           </div>
         </el-col>
+        <!-- 产品 -->
         <el-col :span="3">
           <div class="ratebox">
             <el-progress
@@ -163,6 +170,7 @@
             </div>
           </div>
         </el-col>
+        <!-- 服务 -->
         <el-col :span="3">
           <div class="ratebox">
             <el-progress
@@ -181,6 +189,8 @@
         </el-col>
       </el-row>
     </div>
+
+    <!-- 用户评论部分 -->
   </div>
 </template>
 <script>
@@ -204,8 +214,9 @@ export default {
       url: "/hotels?id=" + this.$route.query.id
     }).then(res => {
       this.myhotel = res.data.data[0];
-      this.value = res.data.data[0].stars;
-      this.hotelbrand = this.myhotel.hotelbrand;
+      this.value = res.data.data[0].stars; //酒店评分星星
+      this.hotelbrand = this.myhotel.hotelbrand; //酒店品牌信息
+      // 修改评分信息
       this.environment = this.myhotel.scores.environment * 10;
       this.product = this.myhotel.scores.product * 10;
       this.service = this.myhotel.scores.service * 10;
