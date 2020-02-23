@@ -127,7 +127,7 @@
             </div>
             <div style="height:38px">
               <selects :num="onehotelselect.levels"
-              :eventName="'AccommodationLevel'" @AccommodationLevel="dataProcessing"></selects>
+              :eventName="'hotellevel'" @hotellevel="dataProcessing"></selects>
             </div>
           </div>
         </div></el-col>
@@ -280,15 +280,15 @@ export default {
       hotel: {
         location:[],
         hotels: [],
-        nextStart: ''
+        nextStart: 0
       },
       hotelPricekey: 100,
       onehotelselectOk: {
-        price: 4000,
-        levels: [],
-        types: [],
-        assets: [],
-        brands: []
+        price_lt: 4000,
+        hotellevel: [],
+        hoteltype: [],
+        hotelasset: [],
+        hotelbrand: []
       },
       onehotelselect: {
         levels: [],
@@ -427,45 +427,22 @@ export default {
         map.setFitView();
     },
     formatTooltip(val) {
-      this.onehotelselectOk.price = val * 40;
+      this.onehotelselectOk.price_lt = val * 40;
       return val * 40;
     },
     dataProcessing (data,name) {
-      if (name === 'AccommodationLevel') {
-        this.onehotelselectOk.levels = data
-      } else if (name === 'hoteltype') {
-        this.onehotelselectOk.types = data
-      } else if (name === 'hotelasset') {
-        this.onehotelselectOk.assets = data
-      } else {
-        this.onehotelselectOk.brands = data
-      }
+      this.onehotelselectOk[name] = data
       this.getComplexHotel()
     },
     getComplexHotel() {
-      // console.log(this.onehotelselectOk)
       let parameter = `city=${this.cityID}&`
       for (let key in this.onehotelselectOk) {
-        if (key === 'price') {
-          parameter += `price_lt=${this.onehotelselectOk[key]}&`
+        if (key === 'price_lt') {
+          parameter += `${key}=${this.onehotelselectOk[key]}&`
         } else if (this.onehotelselectOk[key].length !== 0) {
-          if (key === 'levels') {
-            this.onehotelselectOk[key].forEach(v => {
-              parameter += `hotellevel=${v}&`
-            })
-          } else if (key === 'types') {
-            this.onehotelselectOk[key].forEach(v => {
-              parameter += `hoteltype=${v}&`
-            })
-          } else if (key === 'assets') {
-            this.onehotelselectOk[key].forEach(v => {
-              parameter += `hotelasset=${v}&`
-            })
-          } else {
-            this.onehotelselectOk[key].forEach(v => {
-              parameter += `hotelbrand=${v}&`
-            })
-          }
+          this.onehotelselectOk[key].forEach(v => {
+            parameter += `${key}=${v}&`
+          })
         }
       }
       if (this.time) {
@@ -489,8 +466,6 @@ export default {
       }
     },
     DoHotelData (res) {
-      console.log(res);
-      
       this.hotel.hotels = res.data.data
       this.hotel.location = res.data.data.map(v => {
         return [v.location.longitude, v.location.latitude]
