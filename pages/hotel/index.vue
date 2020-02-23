@@ -47,7 +47,7 @@
             </div>
           </div>
         </div>
-        <el-button type="primary" @click="hotelPrice">查看价格</el-button>
+        <el-button type="primary" @click="getComplexHotel">查看价格</el-button>
     </div>
     <div class="evaluateAndMap">
       <div class="evaluate">
@@ -233,12 +233,22 @@
           </div></el-col>
         </el-row>
       </div>
-      <div class="noonHotelList" v-if="hotel.hotels.length === 0">
+      <div class="noonHotelList" v-if="hotel.hotels.length === 0 && noonHotelList">
         <span>
           <span>没有</span>
           <span style="color: #38f;font-size: 18px;">{{city}}</span>
           <span>的酒店数据。。。。。。</span>
         </span>
+      </div>
+    </div>
+    <div class="Pagination" v-if="hotel.hotels.length !== 0">
+      <div class="PaginationRight">
+        <el-pagination
+          background
+          layout="prev, pager, next"
+          :total="hotel.total"
+          @current-change="PaginationTo">
+        </el-pagination>
       </div>
     </div>
   </div>
@@ -250,6 +260,7 @@ import selects2 from '../../components/hotel/select2'
 export default {
   data() {
     return {
+      noonHotelList: false,
       usermaplocation: {},
       city: '',
       cityID: '',
@@ -268,7 +279,8 @@ export default {
       evaluateAllAOen: true,
       hotel: {
         location:[],
-        hotels: []
+        hotels: [],
+        nextStart: ''
       },
       hotelPricekey: 100,
       onehotelselectOk: {
@@ -365,20 +377,6 @@ export default {
       this.$router.push({name:'hotel', query:{city: item.allName}})
       this.searchCity = ''
     },
-    hotelPrice () {
-      let params= {city: this.cityID}
-      if (this.time) {
-        params= {
-          enterTime: `${this.time[0].getFullYear()}-${this.time[0].getMonth()+1}-${this.time[0].getDate()}`,
-          leftTime: `${this.time[1].getFullYear()}-${this.time[1].getMonth()+1}-${this.time[1].getDate()}`,
-          city: this.cityID
-        } 
-      }
-      this.getHotel(params, (res)=>{
-        // 城市的数据
-        this.DoHotelData(res)
-      })
-    },
     numberOfPeopleChangeOkFun () {
       this.numberOfPeopleChange = false
       this.numberOfPeopleChangeOk=this.numberOfPeople+this.numberOfPeople2
@@ -470,6 +468,11 @@ export default {
           }
         }
       }
+      if (this.time) {
+        parameter += `enterTime=${this.time[0].getFullYear()}-${this.time[0].getMonth()+1}-${this.time[0].getDate()}&`
+        parameter += `leftTime=${this.time[1].getFullYear()}-${this.time[1].getMonth()+1}-${this.time[1].getDate()}&`
+      }
+      parameter += `_start=${this.hotel.nextStart}&`
       this.$axios({
           url: `/hotels?${parameter}`,
         }).then(res => {
@@ -486,21 +489,32 @@ export default {
       }
     },
     DoHotelData (res) {
+      console.log(res);
+      
       this.hotel.hotels = res.data.data
-          this.hotel.location = res.data.data.map(v => {
-            return [v.location.longitude, v.location.latitude]
-          })
-          this.getMap()
+      this.hotel.location = res.data.data.map(v => {
+        return [v.location.longitude, v.location.latitude]
+      })
+      if (this.hotel.hotels.length === 0) {
+        this.noonHotelList = true
+      } else {
+        this.hotel.total = res.data.total
+        this.noonHotelList = false
+        this.getMap()
+      }
     },
     toHoteldetails (id) {
-      console.log(id);
       this.$router.push({path: '/hotel/hotelDetails', query: {id}})
-      
+    },
+    PaginationTo (key) {
+      this.hotel.nextStart = key * 10 - 10
+      this.getComplexHotel()
     }
   },
   watch: {
     '$route.query' () {
       this.city = this.$route.query.city
+      this.noonHotelList = false
       this.getCity(`/cities?name=${this.$route.query.city}`,(res) => {
         this.cityID = res.data.data[0].id
         this.cityScenics = res.data.data[0].scenics
@@ -730,6 +744,14 @@ export default {
       height: 60px;
       line-height: 60px;
       text-align: center;
+    }
+  }
+  .Pagination{
+    margin-top: 10px;
+    padding: 10px 0;
+    height: 32px;
+    .PaginationRight{
+      float: right;
     }
   }
   
