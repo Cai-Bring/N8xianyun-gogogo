@@ -592,11 +592,29 @@ export default {
             console.log(err);
             this.weathrErr = err;
           } else {
+            this.moreWeater(city)
             this.$root.$emit("cityWeater", data);
           }
         });
       });
-    }
+    },
+    moreWeater(city){
+      //加载天气查询插件
+      AMap.plugin('AMap.Weather', () => {
+          //创建天气查询实例
+          var weather = new AMap.Weather();
+
+          //执行实时天气信息查询
+          weather.getForecast(city, (err, data) =>{
+              if (err) {
+                console.log(err);
+              } else {
+                console.log(data);
+                this.$root.$emit("moreWeater", data);
+              }
+          });
+      });
+    },
   },
   watch: {
     "$route.query"() {

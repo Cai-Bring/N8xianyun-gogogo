@@ -163,6 +163,9 @@ export default {
     this.$root.$on("cityWeater", data => {
       this.cityWeather = data;
     });
+    this.$root.$on("moreWeater", data => {
+      this.moreWeaters = data;
+    });
   }
 };
 </script>
