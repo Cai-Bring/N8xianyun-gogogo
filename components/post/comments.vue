@@ -21,6 +21,7 @@
         :on-preview="handlePictureCardPreview"
         :on-remove="handleRemove"
         :on-success="handleUpload"
+        ref="filesList"
       >
         <i class="el-icon-plus"></i>
       </el-upload>
@@ -100,6 +101,7 @@ export default {
           });
           this.textarea = "";
           this.pictureList = [];
+          this.$refs.filesList.clearFiles();
           this.emitNum++;
         });
       } else {
