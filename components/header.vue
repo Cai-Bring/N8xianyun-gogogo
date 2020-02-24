@@ -14,6 +14,24 @@
         <nuxt-link to="/post">旅游攻略</nuxt-link>
         <nuxt-link to="/hotel">酒店</nuxt-link>
         <nuxt-link to="/air">国内机票</nuxt-link>
+        <!-- 天气功能 -->
+        <div class="weather">
+          <el-popover
+            placement="top-start"
+            width="200"
+            trigger="hover">
+            <el-button slot="reference">
+              <div class="okWeater" v-if="cityWeather.length !== 0">
+                <span>{{cityWeather.city}}:</span>
+                <span style="color:#f90">{{cityWeather.weather}}</span>
+                <span style="color:#38f">{{cityWeather.temperature}}&#176;C</span>
+              </div>
+              <div class="noWeater" v-if="cityWeather.length === 0">
+                <span style="color:#38f">天气</span>
+              </div>
+            </el-button>
+          </el-popover>
+        </div>
       </el-row>
 
       <!-- 登录/用户信息 -->
@@ -45,6 +63,12 @@
 </template>
 <script>
 export default {
+  data () {
+    return {
+      cityWeather: [],
+      weathrErr: []
+    }
+  },
   methods: {
     // 用户退出
     handleLogout() {
@@ -54,8 +78,53 @@ export default {
       });
     }
   },
+  mounted() {
+    window.onLoad = () => {
+      this.maplocation()
+    };
+    // 获取地图
+    this.init("https://webapi.amap.com/maps?v=1.4.15&key=9623915ac82517f2e7ba4b95ef9ed725&callback=onLoad")
+    this.$root.$on('cityWeater', (data) => {
+      this.cityWeather = data
+    })
+  },
+  methods: {
+    init (url) {
+      var jsapi = document.createElement("script");
+      jsapi.charset = "utf-8";
+      jsapi.src = url;
+      document.head.appendChild(jsapi);
+    },
+    maplocation() {
+        AMap.plugin("AMap.CitySearch", () => {
+        var citySearch = new AMap.CitySearch();
+        citySearch.getLocalCity((status, result) => {
+          if (status === "complete" && result.info === "OK") {
+            // 查询成功，result即为当前所在城市信息
+            this.maoWeater(result.city)
+            
+          }
+        });
+      });
+    },
+    maoWeater (city) {
+      AMap.plugin('AMap.Weather', () => {
+      //创建天气查询实例
+      var weather = new AMap.Weather();
 
-  mounted() {}
+      //执行实时天气信息查询
+      weather.getLive(city, (err, data) => {
+        if(err){
+          console.log(err);
+          this.weathrErr = err
+        } else {
+          this.cityWeather = data
+        }
+        
+    });
+      });
+    }
+  }
 };
 </script>
 <style scoped lang="less">
@@ -107,6 +176,24 @@ export default {
     /deep/ .nuxt-link-active:not(:first-child) {
       background: #409eff;
       color: #fff !important;
+    }
+    .weather{
+      position: absolute;
+      top: 0;
+      right: 28px;
+      .el-button{
+        border: 0;
+        color: #606266;
+        padding: 21px 20px;
+        &:hover{
+          background-color: #fff;
+        }
+        .okWeater{
+          &>span{
+            margin: 0 3px;
+          }
+        }
+      }
     }
   }
 

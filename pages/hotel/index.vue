@@ -300,6 +300,8 @@ export default {
     };
   },
   mounted() {
+    // 引入地图API
+    this.init("https://webapi.amap.com/maps?v=1.4.15&key=9623915ac82517f2e7ba4b95ef9ed725&callback=onLoad")
     // IP定位代码
     if (this.$route.query.city) {
       this.getCity(`/cities?name=${this.$route.query.city}`,(res) => {
@@ -308,6 +310,7 @@ export default {
         this.getHotel({city: this.cityID}, (res)=>{
           // 城市的数据
           this.DoHotelData(res)
+          this.getWeater(this.$route.query.city)
         })
       })
     }
@@ -321,8 +324,7 @@ export default {
     window.onLoad = () => {
       this.maplocation()
     };
-    // 引入地图API
-    this.init("https://webapi.amap.com/maps?v=1.4.15&key=9623915ac82517f2e7ba4b95ef9ed725&callback=onLoad")
+    
     this.$axios({
           url: `/hotels/options`
         }).then(res => {
@@ -493,6 +495,23 @@ export default {
     PaginationTo (key) {
       this.hotel.nextStart = key * 10 - 10
       this.getComplexHotel()
+    },
+    getWeater(city) {
+     AMap.plugin('AMap.Weather', () => {
+      //创建天气查询实例
+      var weather = new AMap.Weather();
+
+      //执行实时天气信息查询
+      weather.getLive(city, (err, data) => {
+        if(err){
+          console.log(err);
+          this.weathrErr = err
+        } else {
+          this.$root.$emit('cityWeater', data)
+        }
+        
+        });
+      });
     }
   },
   watch: {
@@ -505,6 +524,7 @@ export default {
         this.getHotel({city: this.cityID}, (res)=>{
           // 城市的数据
           this.DoHotelData(res)
+          this.getWeater(this.city)
         })
       })
     }
