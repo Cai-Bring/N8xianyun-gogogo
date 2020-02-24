@@ -16,7 +16,25 @@
         <nuxt-link to="/air">国内机票</nuxt-link>
         <!-- 天气功能 -->
         <div class="weather">
-          <el-popover placement="top-start" width="200" trigger="hover">
+          <el-popover placement="top-start" width="310" trigger="hover">
+            <div class="moreWeather" v-if="moreWeaters.length !== 0">
+              <div class="moreWeather_date" style="border-bottom: 1px solid #ccc;padding: 10px 0 10px 15px;font-size: 12px;">
+                <span>{{moreWeaters.reportTime.slice(0,10)}}</span>
+                <span style="color: #0079f4;margin-left: 10px">{{`未来${moreWeaters.forecasts.length}天天气`}}</span>
+              </div>
+              <div class="moreWeather_msg" style="padding: 5px;font-size: 12px;">
+                <div v-for="(v, i) in moreWeaters.forecasts" class="dailyForecast" :key="i" :style="`display: inline-block;width:150px;
+                padding: 10px 10px;box-sizing: border-box;text-align: center;box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+                ${i === 0 ? 'font-weight: 700' : ''}`">
+                  <div class="moreWeather_msg_date">{{dateToDay(i,v.week)}}</div>
+                  <div class="moreWeather_msg_cond_txt" style="padding: 10px 0;">
+                    <span>{{v.dayWeather}}</span>
+                  </div>
+                  <div class="moreWeather_msg_tmp">{{`${v.dayTemp}~${v.nightTemp}`}}&#176;C</div>
+                  <div class="moreWeather_msg_wind_sc">{{v.dayWindDir+v.dayWindPower+'级'}}</div>
+                </div>
+              </div>
+            </div>
             <el-button slot="reference">
               <div class="okWeater" v-if="cityWeather.length !== 0">
                 <span>{{cityWeather.city}}:</span>
@@ -51,7 +69,6 @@
             </el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
-
         <!-- 不存在用户信息展示登录注册链接 -->
         <nuxt-link to="/user/login" class="account-link" v-else>登录 / 注册</nuxt-link>
       </el-row>
@@ -63,7 +80,8 @@ export default {
   data() {
     return {
       cityWeather: [],
-      weathrErr: []
+      weathrErr: [],
+      moreWeaters:[]
     };
   },
   methods: {
@@ -103,10 +121,35 @@ export default {
             console.log(err);
             this.weathrErr = err;
           } else {
+            this.moreWeater(city)
+            console.log(data);
+            
             this.cityWeather = data;
           }
         });
       });
+    },
+    moreWeater(city){
+      //加载天气查询插件
+      AMap.plugin('AMap.Weather', () => {
+          //创建天气查询实例
+          var weather = new AMap.Weather();
+
+          //执行实时天气信息查询
+          weather.getForecast(city, (err, data) =>{
+              if (err) {
+                console.log(err);
+              } else {
+                console.log(data);
+                this.moreWeaters = data
+              }
+          });
+      });
+    },
+    dateToDay (key,week) {
+      let keys = ['今天', '明天', '后天', '大后天']
+      let weeks = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+      return `${keys[key]}(${weeks[week]})`
     }
   },
   mounted() {
@@ -140,6 +183,7 @@ export default {
   .logo {
     width: 156px;
     padding-top: 8px;
+    
 
     img {
       display: block;
