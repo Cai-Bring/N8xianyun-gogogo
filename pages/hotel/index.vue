@@ -127,7 +127,7 @@
             </div>
             <div style="height:38px">
               <selects :num="onehotelselect.levels"
-              :eventName="'hotellevel'" @hotellevel="dataProcessing"></selects>
+              :eventName="'hotellevel_in'" @hotellevel_in="dataProcessing"></selects>
             </div>
           </div>
         </div></el-col>
@@ -137,7 +137,7 @@
               <span>住宿类型</span>
             </div>
             <div style="height:38px">
-              <selects :num="onehotelselect.types" :eventName="'hoteltype'" @hoteltype="dataProcessing"></selects>
+              <selects :num="onehotelselect.types" :eventName="'hoteltype_in'" @hoteltype_in="dataProcessing"></selects>
             </div>
           </div>
           </div></el-col>
@@ -147,7 +147,7 @@
               <span>酒店设施</span>
             </div>
             <div style="height:38px">
-              <selects :num="onehotelselect.assets" :eventName="'hotelasset'" @hotelasset="dataProcessing"></selects>
+              <selects :num="onehotelselect.assets" :eventName="'hotelasset_in'" @hotelasset_in="dataProcessing"></selects>
             </div>
           </div>
           </div></el-col>
@@ -157,7 +157,7 @@
               <span>酒店品牌</span>
             </div>
             <div style="height:38px">
-              <selects2 :num="onehotelselect.brands" :eventName="'hotelbrand'" @hotelbrand="dataProcessing"></selects2>
+              <selects2 :num="onehotelselect.brands" :eventName="'hotelbrand_in'" @hotelbrand_in="dataProcessing"></selects2>
             </div>
           </div>
           </div></el-col>
@@ -264,6 +264,7 @@ export default {
       usermaplocation: {},
       city: '',
       cityID: '',
+      cityLocatin: '',
       cityScenics: [],
       searchCity: '',
       time: '',
@@ -285,8 +286,8 @@ export default {
       hotelPricekey: 100,
       onehotelselectOk: {
         price_lt: 4000,
-        hotellevel: [],
-        hoteltype: [],
+        hotellevel_in: [],
+        hoteltype_in: [],
         hotelasset: [],
         hotelbrand: []
       },
@@ -398,6 +399,13 @@ export default {
         })
     },
     getMap (map) {
+      if (this.hotel.location.length === 0) {
+        map = new AMap.Map("container", {
+          center: this.cityLocatin,
+          zoom:12
+        })
+        return
+      }
       map =  map ? map : new AMap.Map("container")
       var lnglats = this.hotel.location;
       var infoWindow = new AMap.InfoWindow({offset: new AMap.Pixel(0, -30)});
@@ -473,10 +481,11 @@ export default {
       if (this.hotel.hotels.length === 0) {
         this.noonHotelList = true
       } else {
+        this.cityLocatin = this.hotel.location[0]
         this.hotel.total = res.data.total
         this.noonHotelList = false
-        this.getMap()
       }
+      this.getMap()
     },
     toHoteldetails (id) {
       this.$router.push({path: '/hotel/hotelDetails', query: {id}})
